@@ -134,7 +134,7 @@ public class ChatService : IChatService
         var participant = await _chatRepository.GetParticipantAsync(chatId, accountId);
         if (participant == null) return false;
 
-        participant.ClearedAt = DateTime.UtcNow;
+        participant.ClearedAt = DateTime.Now;
         participant.UnreadCount = 0;
         await _chatRepository.UpdateParticipantAsync(participant);
         await _chatRepository.SaveChangesAsync();
@@ -291,7 +291,15 @@ public class ChatService : IChatService
             return null;
         }
 
-        if (!p.Chat.Messages.Any())
+        var visibleMessages = p.Chat.Messages
+            .Where(m => m.Content != null && !m.Content.StartsWith("__ADMIN_"));
+
+        if (p.ClearedAt.HasValue)
+        {
+            visibleMessages = visibleMessages.Where(m => m.SentAt > p.ClearedAt.Value);
+        }
+
+        if (!visibleMessages.Any())
         {
             return null;
         }
@@ -307,9 +315,7 @@ public class ChatService : IChatService
             ChatId = p.ChatId,
             ChatName = p.Chat.ChatName,
             ChatType = p.Chat.ChatType,
-            LastMessage = p.Chat.Messages
-                .Where(m => m.Content != null && !m.Content.StartsWith("__ADMIN_"))
-                .FirstOrDefault()?.Content,
+            LastMessage = visibleMessages.FirstOrDefault()?.Content,
             LastMessageAt = p.Chat.LastMessageAt,
             ContextType = p.Chat.ContextType,
             ContextId = p.Chat.ContextId,

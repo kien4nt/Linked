@@ -150,6 +150,13 @@ public class AiModelManagementService : IAiModelManagementService
         return result;
     }
 
+    public async Task<List<AiModelAdminDto>> GetActiveModelsByPathsAsync(List<string> paths)
+    {
+        var models = await _aiModelRepo.GetActiveModelsByPathsAsync(paths);
+        if (models == null || models.Count == 0) return new List<AiModelAdminDto>();
+        return _mapper.Map<List<AiModelAdminDto>>(models);
+    }
+
     private async Task<int> SaveAiModelChangesAsync()
     {
         try

@@ -1,3 +1,4 @@
+import json
 import time
 import httpx
 import logging
@@ -68,6 +69,11 @@ class HarmfulHandler(BaseHandler):
 
         # Process the models provided in request
         classifiers: List[AiModelDto] = self.process_request_models(request.models)
+        
+        # print("Course text classifiers:")
+        # for c in classifiers:
+        #     print(json.dumps(vars(c), indent=4, default=str))
+
         if not classifiers:
             self.logger.warning(f"No active classifiers provided for Stage 2. Early exit with manual audit.")
             total_latency = (time.time() - stage_start) * 1000

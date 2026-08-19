@@ -30,6 +30,16 @@ namespace CourseMarketplaceBE.Domain.IRepositories
         Task<List<AiModel>> GetModelsByTypeAsync(string modelType);
 
         /// <summary>
+        /// Check if an AI model with the given name exists.
+        /// </summary>
+        Task<bool> ExistsByModelNameAsync(string modelName);
+
+        /// <summary>
+        /// Check if an AI model with the given path exists.
+        /// </summary>
+        Task<bool> ExistsByModelPathAsync(string modelPath);
+
+        /// <summary>
         /// Retrieve AI model metadata mapped as DTO using model path.
         /// </summary>
         Task<CourseMarketplaceBE.Application.DTOs.AiModelDto?> GetByModelPathAsync(string modelPath);

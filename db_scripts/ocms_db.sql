@@ -709,7 +709,7 @@ CREATE TABLE system_configs (
 
 CREATE TABLE ai_models (
     model_id SERIAL PRIMARY KEY,
-    model_name VARCHAR(255) NOT NULL,
+    model_name VARCHAR(255) UNIQUE NOT NULL,
     model_type VARCHAR(50),
     model_provider VARCHAR(50),
     model_version VARCHAR(50),
@@ -717,7 +717,7 @@ CREATE TABLE ai_models (
     description TEXT,
     model_created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     model_updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-	model_path VARCHAR(255),
+	model_path VARCHAR(255) UNIQUE,
 	process_type VARCHAR(255)
 );
 

@@ -55,6 +55,16 @@ public class AiModelManagementService : IAiModelManagementService
 
     public async Task<AiModelAdminDto> AddModelAsync(CreateAiModelRequest req)
     {
+        if (await _aiModelRepo.ExistsByModelNameAsync(req.ModelName))
+        {
+            throw new BadRequestException("An AI model with this name already exists.");
+        }
+
+        if (!string.IsNullOrEmpty(req.ModelPath) && await _aiModelRepo.ExistsByModelPathAsync(req.ModelPath))
+        {
+            throw new BadRequestException("An AI model with this path already exists.");
+        }
+
         var model = new AiModel
         {
             ModelName = req.ModelName,
@@ -70,16 +80,8 @@ public class AiModelManagementService : IAiModelManagementService
         };
 
         var addedModel = _aiModelRepo.Add(model);
-        int affected;
-        try
-        {
-            affected = await _aiModelRepo.SaveChangesAsync();
-        }
-        catch (AiModelException ex)
-        {
-            throw new BadRequestException(ex.Message);
-        }
-        /* zero rows exception removed */
+        await SaveAiModelChangesAsync();
+        
         Console.WriteLine($"New Model Id {addedModel.ModelId}");
         return _mapper.Map<AiModelAdminDto>(addedModel);
     }
@@ -91,21 +93,12 @@ public class AiModelManagementService : IAiModelManagementService
 
         model.ModelProvider = req.ModelProvider;
         model.ModelVersion = req.ModelVersion;
-        model.ModelPath = req.ModelPath;
+
         model.Description = req.Description;
         model.ModelUpdatedAt = DateTime.UtcNow;
 
         var updatedModel = _aiModelRepo.Update(model);
-        int affected;
-        try
-        {
-            affected = await _aiModelRepo.SaveChangesAsync();
-        }
-        catch (AiModelException ex)
-        {
-            throw new BadRequestException(ex.Message);
-        }
-        /* zero rows exception removed */
+        await SaveAiModelChangesAsync();
 
         return _mapper.Map<AiModelAdminDto>(updatedModel);
     }
@@ -119,16 +112,8 @@ public class AiModelManagementService : IAiModelManagementService
         model.ModelUpdatedAt = DateTime.UtcNow;
 
         _aiModelRepo.Update(model);
-        int affected;
-        try
-        {
-            affected = await _aiModelRepo.SaveChangesAsync();
-        }
-        catch (AiModelException ex)
-        {
-            throw new BadRequestException(ex.Message);
-        }
-        /* zero rows exception removed */
+        await SaveAiModelChangesAsync();
+        
         return true;
     }
 
@@ -163,5 +148,17 @@ public class AiModelManagementService : IAiModelManagementService
 
         await _redisService.SetCacheAsync(cacheKey, result, CacheTtl.Medium.GetTtl());
         return result;
+    }
+
+    private async Task<int> SaveAiModelChangesAsync()
+    {
+        try
+        {
+            return await _aiModelRepo.SaveChangesAsync();
+        }
+        catch (AiModelException ex)
+        {
+            throw new BadRequestException(ex.Message);
+        }
     }
 }

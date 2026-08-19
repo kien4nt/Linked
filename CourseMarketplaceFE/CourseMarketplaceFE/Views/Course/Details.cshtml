@@ -200,7 +200,7 @@
                             }
                         }
                         
-                        @if (!Model.IsOwner && !isManager && !Model.IsRemoved)
+                        @if (!Model.IsOwner && !isManager && !Model.IsRemoved && Model.Price > 0)
                         {
                             <button type="button" 
                                     onclick="toggleWishlist(this, @Model.CourseId);"
@@ -210,7 +210,7 @@
                             </button>
                         }
                     </div>
-                    @if (!Model.IsOwner && !isManager && !Model.IsRemoved)
+                    @if (!Model.IsOwner && !isManager && !Model.IsRemoved && Model.Price > 0)
                     {
                         <p class="text-[11px] text-slate-500 text-center mt-4">14-Day Money-Back Guarantee</p>
                     }

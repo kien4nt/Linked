@@ -442,10 +442,15 @@
                 });
             },
             preConfirm: () => {
+                const note = document.getElementById('swal-note').value.trim();
+                if (!note) {
+                    Swal.showValidationMessage('Please enter a moderation note.');
+                    return false;
+                }
                 return {
                     status: document.getElementById('swal-status').value,
                     removeContent: document.getElementById('swal-remove-content').checked,
-                    resolutionNote: document.getElementById('swal-note').value
+                    resolutionNote: note
                 }
             }
         });
@@ -573,10 +578,15 @@
                 });
             },
             preConfirm: () => {
+                const note = document.getElementById('swal-note').value.trim();
+                if (!note) {
+                    Swal.showValidationMessage('Please enter a moderation note.');
+                    return false;
+                }
                 return {
                     status: document.getElementById('swal-status').value,
                     removeContent: document.getElementById('swal-remove-content').checked,
-                    resolutionNote: document.getElementById('swal-note').value
+                    resolutionNote: note
                 }
             }
         });

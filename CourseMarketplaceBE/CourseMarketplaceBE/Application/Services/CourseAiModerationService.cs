@@ -265,9 +265,11 @@ namespace CourseMarketplaceBE.Application.Services
                 if (model != null) emb_generators.Add(model);
             }
 
-            // If models are not configured in system configs, fetch active ones by type as fallback
-            if (classifiers.Count == 0) classifiers = await _aiModelManagementService.GetModelsByTypeAsync(AiModelConst.Classifier);
-            if (emb_generators.Count == 0) emb_generators = await _aiModelManagementService.GetModelsByTypeAsync(AiModelConst.EmbeddingGenerator);
+            // // If models are not configured in system configs, fetch active ones by type as fallback
+            // if (classifiers.Count == 0) classifiers = await _aiModelManagementService.GetModelsByTypeAsync(AiModelConst.Classifier);
+            // if (emb_generators.Count == 0) emb_generators = await _aiModelManagementService.GetModelsByTypeAsync(AiModelConst.EmbeddingGenerator);
+
+            
 
             return (classifiers, emb_generators);
         }
@@ -595,6 +597,16 @@ namespace CourseMarketplaceBE.Application.Services
             var materialIds = prep.MaterialIds;
             var semDupModels = prep.SemanticDeDuplicationModels;
             var courseHarmModels = prep.CourseHarmfulDetectionModels;
+
+            if (semDupModels.Any(m => m.ModelStatus == AiModelConst.Inactive))
+            {
+                semDupModels = new List<AiModelDto>();
+            }
+
+            if (courseHarmModels.Any(m => m.ModelStatus == AiModelConst.Inactive))
+            {
+                courseHarmModels = new List<AiModelDto>();
+            }
 
             var semanticReq = new SemanticDuplicationRequest
             {

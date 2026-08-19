@@ -48,6 +48,19 @@ class DuplicationHandler(BaseHandler):
 
         # Process the models provided in request
         generators: List[AiModelDto] = self.process_request_models(request.models)
+        if not generators:
+            self.logger.warning(f"No active generators provided for Stage 1. Early exit with manual audit.")
+            total_latency = (time.time() - stage_start) * 1000
+            return CourseModerationResponse(
+                course_id=course_id,
+                moderation_status=ModerationStatus.MANUAL_AUDIT.value,
+                flagged_fields=[],
+                manual_audit_fields=["all"],
+                overall_confidence_score=0.0,
+                total_latency_ms=total_latency,
+                stage_logs=[]
+            )
+
         all_stage_logs: List[StageLog] = []
 
         # 1. Fetch existing cached embeddings
@@ -62,6 +75,7 @@ class DuplicationHandler(BaseHandler):
                 course_id=course_id,
                 moderation_status=ModerationStatus.MANUAL_AUDIT.value,
                 flagged_fields=[],
+                manual_audit_fields=["all"],
                 overall_confidence_score=0.0,
                 total_latency_ms=total_latency,
                 stage_logs=[]

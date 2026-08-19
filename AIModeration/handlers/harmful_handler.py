@@ -68,6 +68,19 @@ class HarmfulHandler(BaseHandler):
 
         # Process the models provided in request
         classifiers: List[AiModelDto] = self.process_request_models(request.models)
+        if not classifiers:
+            self.logger.warning(f"No active classifiers provided for Stage 2. Early exit with manual audit.")
+            total_latency = (time.time() - stage_start) * 1000
+            return CourseModerationResponse(
+                course_id=course_id,
+                moderation_status=ModerationStatus.MANUAL_AUDIT.value,
+                flagged_fields=[],
+                manual_audit_fields=["all"],
+                overall_confidence_score=0.0,
+                total_latency_ms=total_latency,
+                stage_logs=[]
+            )
+
         all_stage_logs: List[StageLog] = []
 
         # Find model ID for harmful text classifier

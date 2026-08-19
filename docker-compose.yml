@@ -62,6 +62,7 @@ services:
   #     WHISPER_MODEL_NAME: ${WHISPER_MODEL_NAME}
   #     MEDIA_EMBEDDING_DIM: ${MEDIA_EMBEDDING_DIM}
   #     TEXT_EMBEDDING_DIM: ${TEXT_EMBEDDING_DIM}
+  #     REQUEST_TIMEOUT: ${REQUEST_TIMEOUT}
   #   volumes:
   #     - hf_cache:/root/.cache/huggingface
   #     - easyocr_cache:/root/.EasyOCR
@@ -89,6 +90,7 @@ services:
       ASPNETCORE_ENVIRONMENT: ${ASPNETCORE_ENVIRONMENT}
       ASPNETCORE_URLS: "http://+:80"
       TZ: Asia/Ho_Chi_Minh
+      REQUEST_TIMEOUT: ${REQUEST_TIMEOUT}
       JWT_KEY: ${JWT_KEY}
       JWT_ISSUER: ${JWT_ISSUER}
       JWT_AUDIENCE: ${JWT_AUDIENCE}

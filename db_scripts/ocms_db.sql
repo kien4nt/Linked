@@ -1049,7 +1049,7 @@ INSERT INTO
 system_configs(config_key,config_value,description)
 VALUES
 ('course_harmful_text_classifier','ki4n-4nt/spam_text_classifier,ki4n-4nt/toxic_text_classifier','system config of course_harmful_text_classifier'),
-('course_text_embedding_generator', 'distilbert-base-multilingual-cased','system config of course_text_embedding_generator'),
+('course_text_embedding_generator', 'sentence-transformers/paraphrase-multilingual-MiniLM-L12-v2','system config of course_text_embedding_generator'),
 ('course_media_embedding_generator','openai/clip-vit-base-patch32','system config of course_media_embedding_generator'),
 ('review_harmful_text_classifier','ki4n-4nt/spam_text_classifier,ki4n-4nt/toxic_text_classifier','system config of review_harmful_text_classifier');
 

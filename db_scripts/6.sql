@@ -43,3 +43,6 @@ WHERE config_key = 'moderation_threshold';
 ALTER TABLE ai_models ADD CONSTRAINT ai_models_model_name_key UNIQUE (model_name);
 ALTER TABLE ai_models ADD CONSTRAINT ai_models_model_path_key UNIQUE (model_path);
 
+UPDATE system_configs 
+SET config_value = 'sentence-transformers/paraphrase-multilingual-MiniLM-L12-v2' 
+WHERE config_key = 'course_text_embedding_generator';

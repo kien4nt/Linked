@@ -378,7 +378,7 @@ namespace CourseMarketplaceBE.Application.Services
             // Save changes after all additions are made
             await SaveAiFeedbackChangesAsync();
 
-            string notificationContent = GetNotificationContent(courseId, moderationStatus, flaggedFields, manualAuditFields);
+            string notificationContent = await GetNotificationContentAsync(courseId, moderationStatus, result.StageLogs);
             await NotifyManagersAsync("AI Moderation Result", notificationContent, UrlConst.AdminCourseModerationURL + $"?search={courseId}#course_{courseId}");
             
             await _hubService.SendCourseUpdateAsync();
@@ -740,18 +740,102 @@ namespace CourseMarketplaceBE.Application.Services
             return 0;
         }
 
-        private string GetNotificationContent(int courseId, string moderationStatus, List<string> flaggedFields, List<string> manualAuditFields)
+        private async Task<string> GetNotificationContentAsync(int courseId, string moderationStatus, List<StageLog> stageLogs)
         {
-            string content = $"Course {courseId} requires manual review following AI Moderation.\nAI Moderation Result: {moderationStatus}.";
-            if (flaggedFields != null && flaggedFields.Any())
+            string opening = $"{courseId}";
+            var course = await _courseRepository.GetByIdAsync(courseId);
+            if (course != null) opening = course.Title ?? opening;
+
+            string content = $"Course '{opening}' requires manual review following AI Moderation.\nAI Moderation Result: {moderationStatus}.";
+            
+            if (stageLogs == null || !stageLogs.Any())
             {
-                content += $"\nSevere Threats found in: {string.Join(", ", flaggedFields)}";
+                return content;
             }
-            if (manualAuditFields != null && manualAuditFields.Any())
+
+            var groupedLogs = stageLogs.GroupBy(s => s.Stage).OrderBy(g => g.Key);
+
+            foreach (var group in groupedLogs)
             {
-                content += $"\nModerate Threats found in: {string.Join(", ", manualAuditFields)}";
+                string stageName = group.Key == 1 ? "Duplication Check" : "Harmful Content Check";
+                
+                var flaggedFields = group.SelectMany(s => s.FlaggedFields ?? Enumerable.Empty<string>()).ToList();
+                var manualAuditFields = group.SelectMany(s => s.ManualAuditFields ?? Enumerable.Empty<string>()).ToList();
+
+                if (flaggedFields.Any())
+                {
+                    var formattedFields = await FormatFieldsAsync(flaggedFields, courseId);
+                    content += $"\n[{stageName}] Severe Threats found in:\n{string.Join("\n", formattedFields)}";
+                }
+                if (manualAuditFields.Any())
+                {
+                    var formattedFields = await FormatFieldsAsync(manualAuditFields, courseId);
+                    content += $"\n[{stageName}] Moderate Threats found in:\n{string.Join("\n", formattedFields)}";
+                }
             }
+
             return content;
+        }
+
+        private async Task<List<string>> FormatFieldsAsync(List<string> fields, int courseId)
+        {
+            var formattedList = new List<string>();
+            foreach (var field in fields.Distinct())
+            {
+                if (field.Equals("all", StringComparison.OrdinalIgnoreCase))
+                {
+                    formattedList.Add("- All Course Content");
+                    continue;
+                }
+
+                int id = GetIdFromFieldName(field, courseId);
+                string entityType = "course";
+                string entityTitle = $"Course {id}";
+
+                if (field.StartsWith("course", StringComparison.OrdinalIgnoreCase))
+                {
+                    var course = await _courseRepository.GetByIdAsync(id);
+                    if (course != null) entityTitle = course.Title ?? entityTitle;
+                    entityType = "course";
+                }
+                else if (field.StartsWith("lesson", StringComparison.OrdinalIgnoreCase))
+                {
+                    var lesson = await _lessonRepository.GetByIdAsync(id);
+                    if (lesson != null) entityTitle = lesson.Title ?? entityTitle;
+                    entityType = "lesson";
+                }
+                else if (field.StartsWith("material", StringComparison.OrdinalIgnoreCase))
+                {
+                    var material = await _materialRepository.GetByIdAsync(id);
+                    if (material != null) entityTitle = material.Title ?? entityTitle;
+                    entityType = "learning material";
+                }
+                
+                // Default for learning material duplication
+                string fieldName = "Content";
+                var parts = field.Split('.');
+                if (parts.Length > 1)
+                {
+                    fieldName = FormatFieldName(parts[1]);
+                }
+
+                formattedList.Add($"- {fieldName} of {entityType} '{entityTitle}'");
+            }
+            return formattedList;
+        }
+
+        private string FormatFieldName(string fieldName)
+        {
+            if (string.IsNullOrEmpty(fieldName)) return string.Empty;
+            var words = fieldName.Split('_');
+            for (int i = 0; i < words.Length; i++)
+            {
+                if (words[i].Length > 0)
+                {
+                    words[i] = char.ToUpper(words[i][0]) + words[i].Substring(1).ToLower();
+                }
+            }
+            return string.Join(" ", words);
         }
 
         private async Task<bool> PersistAiFeedbackAsync(string fieldName, int id, string moderationStatus, string feedbackText)

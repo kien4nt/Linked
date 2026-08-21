@@ -677,6 +677,11 @@
                 });
                 if (!res.ok) return;
 
+                const contentType = res.headers.get("content-type");
+                if (!contentType || !contentType.includes("application/json")) {
+                    return;
+                }
+
                 const result = await res.json();
                 const items = result?.data?.items ?? [];
                 const cartCourseIds = items.map(item => item.courseId);

@@ -718,9 +718,9 @@ namespace CourseMarketplaceBE.Application.Services
                 return "Content is safe.";
                 
             if (moderationStatus == ModerationStatus.ManualAudit.ToValue()) 
-                return $"Manual audit suggested. Reason: {reason}. Text snippet: '{text}'";
+                return $"Manual audit suggested.\nReason: {reason}.\nText snippet: '{text}'";
                 
-            return $"Content flagged as {rawLabel}. Reason: {reason}. Text snippet: '{text}'";
+            return $"Content flagged as {rawLabel}.\nReason: {reason}.\nText snippet: '{text}'";
         }
 
         private int GetIdFromFieldName(string fieldName, int courseId)

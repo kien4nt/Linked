@@ -1753,7 +1753,7 @@
 
                     feedbackContentHtml += `
                         <div class="mb-3 pb-3 border-b border-slate-700 last:mb-0 last:pb-0 last:border-0">
-                            <p class="font-bold text-[10px] uppercase tracking-wider mb-1 ${sectionColor}">MATERIAL: ${matTitle} (${matStatus.replace('_', ' ')})</p>
+                            <p class="font-bold text-[10px] uppercase tracking-wider mb-1 ${sectionColor}">LEARNING MATERIAL: ${matTitle} (${matStatus.replace('_', ' ')})</p>
                         </div>
                     `;
                 });
@@ -1800,7 +1800,7 @@
                                 <span class="material-symbols-outlined text-[32px] drop-shadow-md ${bgColor} ${animation} text-white rounded-full hover:scale-110 transition-transform cursor-help p-1">${icon}</span>
                             </div>
                             <div class="absolute bottom-0 right-0 translate-y-full mb-2 w-72 p-3 bg-slate-800 text-white text-xs rounded-lg shadow-xl opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all duration-200 z-[80] pointer-events-none text-left leading-relaxed normal-case tracking-normal font-normal cursor-default">
-                                <p class="font-bold ${textColor} mb-1 uppercase tracking-wider opacity-90 border-b pb-1 mb-2 border-white/20">AI Feedback: ${statusLower.replace('_', ' ')}</p>
+                                <p class="font-bold ${textColor} mb-1 uppercase tracking-wider opacity-90 border-b pb-1 mb-2 border-white/20">${feedback.FieldName.replace(/_/g, ' ')} (${statusLower.replace('_', ' ')})</p>
                                 <div style="white-space: pre-wrap;">${feedback.FeedbackText}</div>
                                 <div class="absolute top-full right-6 -mt-px border-4 border-transparent border-t-slate-800"></div>
                             </div>
@@ -1812,7 +1812,7 @@
                                 <span class="material-symbols-outlined text-[24px] ${textColor} ${animation} transition-transform group-hover:scale-110 cursor-help">${icon}</span>
                             </span>
                             <div class="absolute bottom-full left-1/2 -translate-x-1/2 mb-2 w-72 p-3 bg-slate-800 text-white text-xs rounded-lg shadow-xl opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all duration-200 z-[80] pointer-events-none text-left leading-relaxed normal-case tracking-normal font-normal cursor-default">
-                                <p class="font-bold ${textColor} mb-1 uppercase tracking-wider opacity-90 border-b pb-1 mb-2 border-white/20">AI Feedback: ${statusLower.replace('_', ' ')}</p>
+                                <p class="font-bold ${textColor} mb-1 uppercase tracking-wider opacity-90 border-b pb-1 mb-2 border-white/20">${feedback.FieldName.replace(/_/g, ' ')} (${statusLower.replace('_', ' ')})</p>
                                 <div style="white-space: pre-wrap;">${feedback.FeedbackText}</div>
                                 <div class="absolute top-full left-1/2 -translate-x-1/2 -mt-px border-4 border-transparent border-t-slate-800"></div>
                             </div>

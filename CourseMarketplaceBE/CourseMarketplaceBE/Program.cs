@@ -321,7 +321,7 @@ public class Program
             // Auth endpoints: 10/min
             options.AddFixedWindowLimiter("AuthPolicy", opt =>
             {
-                opt.PermitLimit = 10;
+                opt.PermitLimit = 5;
                 opt.Window = TimeSpan.FromMinutes(1);
                 opt.QueueProcessingOrder = QueueProcessingOrder.OldestFirst;
                 opt.QueueLimit = 0;

@@ -191,7 +191,7 @@ public class EmbeddingService : IEmbeddingService
         var isInitialized = await _redisService.GetCacheAsync<bool>(CacheKeys.MaterialEmbeddingInitialized.GetKey());
         if (isInitialized) return false;
 
-        var allEmbeddings = await GetAllMaterialEmbeddingsAsync();
+        var allEmbeddings = await GetAvailableMaterialEmbeddingsAsync();
         foreach (var e in allEmbeddings)
         {
             string cacheKey = CacheKeys.MaterialEmbedding.GetKey(e.MaterialId.GetValueOrDefault());
@@ -204,6 +204,24 @@ public class EmbeddingService : IEmbeddingService
 
         await _redisService.SetCacheAsync(CacheKeys.MaterialEmbeddingInitialized.GetKey(), true, CacheTtl.Medium.GetTtl());
         return true;
+    }
+
+    private async Task<List<MaterialEmbeddingResponse>> GetAvailableMaterialEmbeddingsAsync()
+    {
+        var rawEmbeddings = await GetAllMaterialEmbeddingsAsync();
+        var activeEmbeddings = new List<MaterialEmbeddingResponse>();
+        foreach (var e in rawEmbeddings)
+        {
+            if (e.MaterialId.HasValue)
+            {
+                var material = await _materialRepository.GetByIdAsync(e.MaterialId.Value);
+                if (material != null && material.LearningStatus != LearningStatus.Removed.ToValue())
+                {
+                    activeEmbeddings.Add(e);
+                }
+            }
+        }
+        return activeEmbeddings;
     }
 
 

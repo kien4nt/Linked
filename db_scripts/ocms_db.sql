@@ -1057,7 +1057,7 @@ INSERT INTO
 system_configs(config_key,config_value,description)
 VALUES
 ('moderation_threshold',
-'{"similarity": 0.85,"spam": 0.85,"toxic": 0.85}',
+'{"similarity": 0.9,"spam": 0.95,"toxic": 0.9}',
 'system config of AI moderation threshold');
 
 -- =====================================================================

@@ -856,6 +856,7 @@
                     
                     if (res.ok) {
                         input.value = "";
+                        input.style.height = 'auto';
                         showPendingSupportUI(content);
                         await loadPendingRequests();
                     } else {
@@ -902,6 +903,7 @@
                     Attachments: attachments
                 });
                 input.value = "";
+                input.style.height = 'auto';
                 selectedFiles = [];
                 renderAttachmentPreview();
                 await chatPageConnection.invoke("Typing", activeChatId, false);

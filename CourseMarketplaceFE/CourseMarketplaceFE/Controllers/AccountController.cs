@@ -665,8 +665,14 @@ namespace CourseMarketplaceFE.Controllers
                 return RedirectToAction("Login");
             }
 
-            // ❗ FIX QUAN TRỌNG
-            ViewBag.ErrorMessage = "Incorrect or expired OTP";
+            // ❗ Đọc lỗi thực tế từ Backend trả về
+            var errorMessage = await res.Content.ReadAsStringAsync();
+            if (string.IsNullOrEmpty(errorMessage)) 
+            {
+                errorMessage = "Incorrect or expired OTP";
+            }
+
+            ViewBag.ErrorMessage = errorMessage;
 
             return View(model);
         }

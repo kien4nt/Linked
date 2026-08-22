@@ -31,10 +31,17 @@ namespace CourseMarketplaceBE.Infrastructure.Services
 
         public AiModerationService(
             HttpClient httpClient,
-            ILogger<AiModerationService> logger)
+            ILogger<AiModerationService> logger,
+            Microsoft.Extensions.Configuration.IConfiguration configuration)
         {
             _httpClient = httpClient;
-            _httpClient.Timeout = TimeSpan.FromMinutes(30);
+            var requestTimeoutEnv = configuration["REQUEST_TIMEOUT"];
+            var timeoutSeconds = 1800; // 30 minutes default
+            if (!string.IsNullOrEmpty(requestTimeoutEnv) && int.TryParse(requestTimeoutEnv, out var parsedTimeout))
+            {
+                timeoutSeconds = parsedTimeout;
+            }
+            _httpClient.Timeout = TimeSpan.FromSeconds(timeoutSeconds);
             _logger = logger;
 
             // Setup retry policy

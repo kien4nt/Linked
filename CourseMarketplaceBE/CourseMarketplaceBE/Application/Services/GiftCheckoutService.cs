@@ -288,7 +288,7 @@ public class GiftCheckoutService : IGiftCheckoutService
                 StripeSessionId = sessionId,
                 StripePaymentintentId = paymentIntentId,
                 Currency = "usd",
-                TransactionsStatus = "Success",
+                TransactionsStatus = TransactionStatus.Succeeded.ToValue(),
                 TransactionType = "gift",
                 TransactionCreatedAt = DateTime.Now,
                 TransferRate = 100

@@ -22,6 +22,7 @@ public class CourseQueryService : ICourseQueryService
     private readonly ICartRepository _cartRepository;
     private readonly ILogger<CourseQueryService> _logger;
     private readonly ICourseExtRepository _courseExtRepository;
+    private readonly IAiFeedbackRepository _aiFeedbackRepository;
 
     public CourseQueryService(
         ICourseRepository courseRepository,
@@ -31,7 +32,8 @@ public class CourseQueryService : ICourseQueryService
         IMapper mapper,
         ICartRepository cartRepository,
         ILogger<CourseQueryService> logger,
-        ICourseExtRepository courseExtRepository)
+        ICourseExtRepository courseExtRepository,
+        IAiFeedbackRepository aiFeedbackRepository)
     {
         _courseRepository = courseRepository;
         _instructorRepository = instructorRepository;
@@ -41,6 +43,7 @@ public class CourseQueryService : ICourseQueryService
         _cartRepository = cartRepository;
         _logger = logger;
         _courseExtRepository = courseExtRepository;
+        _aiFeedbackRepository = aiFeedbackRepository;
     }
 
     public async Task<bool> CheckThumbnailDuplicateAsync(string hash, int? excludeCourseId = null)
@@ -285,6 +288,12 @@ public class CourseQueryService : ICourseQueryService
             {
                 throw new UnauthorizedAccessException("You do not have permission to view this course.");
             }
+        }
+
+        if (userRole != null && (string.Equals(userRole, "admin", StringComparison.OrdinalIgnoreCase) || 
+                                 string.Equals(userRole, "staff", StringComparison.OrdinalIgnoreCase)))
+        {
+            response.AiFeedbacks = await _aiFeedbackRepository.GetLatestFeedbacksByCourseAsync(courseId);
         }
 
         return response;

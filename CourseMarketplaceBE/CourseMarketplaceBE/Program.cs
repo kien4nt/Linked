@@ -145,6 +145,7 @@ public class Program
         builder.Services.AddScoped<IAuthService, AuthService>();
         builder.Services.AddScoped<IGoogleTokenValidator, GoogleTokenValidator>();
         builder.Services.AddScoped<ICourseRepository, CourseRepository>();
+        builder.Services.AddScoped<IAiFeedbackRepository, AiFeedbackRepository>();
         builder.Services.AddScoped<IReviewRepository, ReviewRepository>();
         builder.Services.AddScoped<ILessonRepository, LessonRepository>();
         builder.Services.AddScoped<IMaterialRepository, MaterialRepository>();
@@ -320,7 +321,7 @@ public class Program
             // Auth endpoints: 10/min
             options.AddFixedWindowLimiter("AuthPolicy", opt =>
             {
-                opt.PermitLimit = 10;
+                opt.PermitLimit = 5;
                 opt.Window = TimeSpan.FromMinutes(1);
                 opt.QueueProcessingOrder = QueueProcessingOrder.OldestFirst;
                 opt.QueueLimit = 0;

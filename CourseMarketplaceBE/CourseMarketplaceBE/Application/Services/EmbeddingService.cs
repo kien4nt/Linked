@@ -189,7 +189,16 @@ public class EmbeddingService : IEmbeddingService
     public async Task<bool> PrepareMaterialEmbeddingsAsync()
     {
         var isInitialized = await _redisService.GetCacheAsync<bool>(CacheKeys.MaterialEmbeddingInitialized.GetKey());
-        if (isInitialized) return false;
+        if (isInitialized)
+        {
+            var removedMaterialIds = await _materialRepository.GetRemovedMaterialIdsAsync();
+            foreach (var id in removedMaterialIds)
+            {
+                string cacheKey = CacheKeys.MaterialEmbedding.GetKey(id);
+                await _redisService.RemoveCacheAsync(cacheKey);
+            }
+            return false;
+        }
 
         var allEmbeddings = await GetAvailableMaterialEmbeddingsAsync();
         foreach (var e in allEmbeddings)

@@ -851,19 +851,20 @@
             miniChatId = chat.chatId;
             isWaitingForSupport = false;
 
-            document.getElementById('support-name').innerText = chat.partnerName || 'Support Team';
+            const nameElem = document.getElementById('support-name');
+            if (nameElem) nameElem.innerText = chat.partnerName || 'Support Team';
             
             // Clear the input field when switching chats
             const inputField = document.getElementById('mini-chat-input');
             if (inputField) inputField.value = '';
+            const avatarElem = document.getElementById('support-avatar');
+            const iconElem = document.getElementById('support-icon');
             if (chat.partnerAvatar) {
-                const img = document.getElementById('support-avatar');
-                img.src = chat.partnerAvatar;
-                img.classList.remove('hidden');
-                document.getElementById('support-icon').classList.add('hidden');
+                if (avatarElem) { avatarElem.src = chat.partnerAvatar; avatarElem.classList.remove('hidden'); }
+                if (iconElem) iconElem.classList.add('hidden');
             } else {
-                document.getElementById('support-avatar').classList.add('hidden');
-                document.getElementById('support-icon').classList.remove('hidden');
+                if (avatarElem) avatarElem.classList.add('hidden');
+                if (iconElem) iconElem.classList.remove('hidden');
             }
             
             renderMiniChatDropdown(); // update active styling
@@ -922,8 +923,10 @@
             miniChatId = null; // Clear active chat ID
             isWaitingForSupport = false;
             
-            document.getElementById('support-name').innerText = 'Support Team';
-            document.getElementById('support-avatar').src = '/img/default-avatar.png';
+            const nameElem = document.getElementById('support-name');
+            if (nameElem) nameElem.innerText = 'Support Team';
+            const avatarElem = document.getElementById('support-avatar');
+            if (avatarElem) avatarElem.src = '/img/default-avatar.png';
             
             // Clear the input field when switching to new support chat
             const inputField = document.getElementById('mini-chat-input');
@@ -936,22 +939,25 @@
                     const pendings = await pendingRes.json();
                     if (pendings && pendings.length > 0) {
                         isWaitingForSupport = true;
-                        document.getElementById('mini-chat-content').innerHTML = ''; // Clear container
-                        
-                        // Show the message we sent
-                        appendMiniMsg({ senderId: currentUserId, content: pendings[0].initialMessage });
-                        
-                        // Show waiting UI
-                        const waitingHtml = `
-                            <div class="text-center py-6 w-full relative z-10" id="waiting-support-ui">
-                                <div class="w-12 h-12 bg-emerald-100 text-emerald-600 rounded-full flex items-center justify-center mx-auto mb-3 animate-pulse">
-                                    <span class="material-symbols-outlined">support_agent</span>
+                        const container = document.getElementById('mini-chat-content');
+                        if (container) {
+                            container.innerHTML = ''; // Clear container
+                            
+                            // Show the message we sent
+                            appendMiniMsg({ senderId: currentUserId, content: pendings[0].initialMessage });
+                            
+                            // Show waiting UI
+                            const waitingHtml = `
+                                <div class="text-center py-6 w-full relative z-10" id="waiting-support-ui">
+                                    <div class="w-12 h-12 bg-emerald-100 text-emerald-600 rounded-full flex items-center justify-center mx-auto mb-3 animate-pulse">
+                                        <span class="material-symbols-outlined">support_agent</span>
+                                    </div>
+                                    <p class="text-xs font-medium text-slate-500">Your request is in queue.</p>
+                                    <p class="text-[10px] text-slate-400">Waiting for support staff...</p>
                                 </div>
-                                <p class="text-xs font-medium text-slate-500">Your request is in queue.</p>
-                                <p class="text-[10px] text-slate-400">Waiting for support staff...</p>
-                            </div>
-                        `;
-                        document.getElementById('mini-chat-content').insertAdjacentHTML('beforeend', waitingHtml);
+                            `;
+                            container.insertAdjacentHTML('beforeend', waitingHtml);
+                        }
                         return;
                     }
                 }
@@ -1007,38 +1013,47 @@
                     const pendings = await pendingRes.json();
                     if (pendings && pendings.length > 0) {
                         isWaitingForSupport = true;
-                        document.getElementById('support-name').innerText = 'Support Team';
-                        document.getElementById('mini-chat-content').innerHTML = ''; // Clear container
-                        
-                        // Show the message we sent
-                        appendMiniMsg({ senderId: currentUserId, content: pendings[0].initialMessage });
-                        
-                        // Show waiting UI
-                        const waitingHtml = `
-                            <div class="text-center py-6 w-full relative z-10" id="waiting-support-ui">
-                                <div class="w-12 h-12 bg-emerald-100 text-emerald-600 rounded-full flex items-center justify-center mx-auto mb-3 animate-pulse">
-                                    <span class="material-symbols-outlined">support_agent</span>
+                        const nameElem = document.getElementById('support-name');
+                        if (nameElem) nameElem.innerText = 'Support Team';
+                        const container = document.getElementById('mini-chat-content');
+                        if (container) {
+                            container.innerHTML = ''; // Clear container
+                            
+                            // Show the message we sent
+                            appendMiniMsg({ senderId: currentUserId, content: pendings[0].initialMessage });
+                            
+                            // Show waiting UI
+                            const waitingHtml = `
+                                <div class="text-center py-6 w-full relative z-10" id="waiting-support-ui">
+                                    <div class="w-12 h-12 bg-emerald-100 text-emerald-600 rounded-full flex items-center justify-center mx-auto mb-3 animate-pulse">
+                                        <span class="material-symbols-outlined">support_agent</span>
+                                    </div>
+                                    <p class="text-xs font-medium text-slate-500">Your request is in queue.</p>
+                                    <p class="text-[10px] text-slate-400">Waiting for support staff...</p>
                                 </div>
-                                <p class="text-xs font-medium text-slate-500">Your request is in queue.</p>
-                                <p class="text-[10px] text-slate-400">Waiting for support staff...</p>
-                            </div>
-                        `;
-                        document.getElementById('mini-chat-content').insertAdjacentHTML('beforeend', waitingHtml);
+                            `;
+                            container.insertAdjacentHTML('beforeend', waitingHtml);
+                        }
                         return;
                     }
                 }
                 
                 // No pending request found. Show welcome state.
-                document.getElementById('support-name').innerText = 'Support Team';
+                const nameElem = document.getElementById('support-name');
+                if (nameElem) nameElem.innerText = 'Support Team';
                 showMiniWelcomeState();
             } catch (err) {
                 console.error("Init mini chat error:", err);
-                document.getElementById('mini-chat-content').innerHTML = `<div class="text-center py-4 text-xs text-red-500">Unable to connect to support.</div>`;
+                const container = document.getElementById('mini-chat-content');
+                if (container) {
+                    container.innerHTML = `<div class="text-center py-4 text-xs text-red-500">Unable to connect to support.</div>`;
+                }
             }
         }
 
         function showMiniWelcomeState() {
             const container = document.getElementById('mini-chat-content');
+            if (!container) return;
             let html = `
                 <div class="flex flex-col w-fit max-w-[85%] self-start relative z-10 mb-1 mt-2">
                     <div class="text-[10px] font-bold text-slate-400 mb-1 px-1 text-left">Support Team</div>
@@ -1056,11 +1071,12 @@
 
         async function loadMiniHistory() {
             if (!miniChatId) return;
+            const container = document.getElementById('mini-chat-content');
+            if (!container) return;
             try {
                 // Use BFF Proxy
                 const res = await fetch(`/Chat/GetHistory?roomId=${miniChatId}`);
                 const msgs = await res.json();
-                const container = document.getElementById('mini-chat-content');
                 let html = '';
                 const staffNameElem = document.getElementById('support-name');
                 const staffName = staffNameElem ? staffNameElem.innerText : 'Support Team';
@@ -1217,8 +1233,10 @@
                                 <p class="text-[10px] text-slate-400">Waiting for support staff...</p>
                             </div>
                         `;
-                        container.insertAdjacentHTML('beforeend', waitingHtml);
-                        container.scrollTop = container.scrollHeight;
+                        if (container) {
+                            container.insertAdjacentHTML('beforeend', waitingHtml);
+                            container.scrollTop = container.scrollHeight;
+                        }
                     }
                 } catch (err) {
                     console.error("Request support error:", err);

@@ -493,7 +493,8 @@ public class ChatService : IChatService
             SenderAvatar = sender.AvatarUrl,
             InitialMessage = dto.Content,
             RequestedAt = DateTime.UtcNow,
-            TargetRole = dto.TargetRole
+            TargetRole = dto.TargetRole,
+            Attachments = dto.Attachments
         };
     }
 
@@ -540,7 +541,8 @@ public class ChatService : IChatService
         var msgDto = new SendMessageDto
         {
             ChatId = chatId,
-            Content = ticket.InitialMessage
+            Content = ticket.InitialMessage,
+            Attachments = ticket.Attachments
         };
         await SaveMessageAsync(ticket.SenderId, msgDto);
     }

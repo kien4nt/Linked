@@ -827,7 +827,18 @@
             const content = input.value.trim();
             
             if (activeChatId === 'support_ticket') {
-                if (!content) return;
+                if (!content && selectedFiles.length === 0) {
+                    Swal.fire({
+                        title: 'Message required',
+                        text: 'Please enter a message or attach a file to send your support request.',
+                        icon: 'warning',
+                        toast: true,
+                        position: 'top-end',
+                        showConfirmButton: false,
+                        timer: 3000
+                    });
+                    return;
+                }
                 
                 if (isWaitingForSupportStaff) {
                     Swal.fire({
@@ -846,18 +857,39 @@
                 const sendBtn = document.getElementById('btn-send');
                 sendBtn.disabled = true;
                 sendBtn.innerHTML = '<span class="material-symbols-outlined animate-spin">sync</span>';
+
+                // 1. Upload files first if any
+                const attachments = [];
+                for (const file of selectedFiles) {
+                    const uploaded = await uploadFile(file);
+                    if (uploaded) {
+                        attachments.push({
+                            FileUrl: uploaded.fileUrl || uploaded.FileUrl,
+                            FileName: uploaded.fileName || uploaded.FileName,
+                            FileType: uploaded.fileType || uploaded.FileType,
+                            FileSize: uploaded.fileSize || uploaded.FileSize
+                        });
+                    }
+                }
                 
                 try {
+                    const initialText = content || (attachments.length > 0 ? "Sent an attachment" : "");
                     const res = await fetch("/Chat/RequestSupport", {
                         method: 'POST',
                         headers: { 'Content-Type': 'application/json' },
-                        body: JSON.stringify({ content: content, targetRole: 'staff' })
+                        body: JSON.stringify({
+                            content: initialText,
+                            targetRole: 'staff',
+                            attachments: attachments
+                        })
                     });
                     
                     if (res.ok) {
                         input.value = "";
                         input.style.height = 'auto';
-                        showPendingSupportUI(content);
+                        selectedFiles = [];
+                        renderAttachmentPreview();
+                        showPendingSupportUI(initialText);
                         await loadPendingRequests();
                     } else {
                         Swal.fire('Error', 'Failed to send request.', 'error');

@@ -82,7 +82,6 @@ public class SupportRequestDto
 {
     public string Content { get; set; } = null!;
     public string TargetRole { get; set; } = "staff"; // "staff" or "admin"
-    public List<AttachmentInputDto>? Attachments { get; set; }
 }
 
 public class SupportTicketDto
@@ -94,5 +93,4 @@ public class SupportTicketDto
     public string InitialMessage { get; set; } = null!;
     public DateTime RequestedAt { get; set; }
     public string TargetRole { get; set; } = null!;
-    public List<AttachmentInputDto>? Attachments { get; set; }
 }

@@ -605,6 +605,13 @@
             document.getElementById('chat-content').style.display = 'none';
             document.getElementById('empty-state').style.display = 'block';
             document.querySelectorAll('.chat-card').forEach(c => c.classList.remove('active'));
+
+            const currentUrl = new URL(window.location);
+            currentUrl.searchParams.delete('chatId');
+            currentUrl.searchParams.delete('fallbackName');
+            currentUrl.searchParams.delete('fallbackAvatar');
+            window.history.replaceState({}, '', currentUrl);
+
             loadPendingRequests();
         }
         // ------------------------------ //
@@ -635,8 +642,15 @@
 
         // 3. Chọn cuộc hội thoại
         async function selectChat(chatId, name, avatar, isOnline = true, forceReload = false) {
-            currentChatId = chatId;
             document.querySelector('.chat-wrapper').classList.add('chat-active');
+
+            if (chatId && chatId !== 'support_ticket' && !isNaN(chatId)) {
+                const currentUrl = new URL(window.location);
+                currentUrl.searchParams.set('chatId', chatId);
+                if (name) currentUrl.searchParams.set('fallbackName', name);
+                if (avatar) currentUrl.searchParams.set('fallbackAvatar', avatar);
+                window.history.replaceState({}, '', currentUrl);
+            }
 
             if (!forceReload && activeChatId === chatId) return;
             
@@ -1141,6 +1155,12 @@
                         activeChatId = null;
                         document.getElementById('chat-content').style.display = 'none';
                         document.getElementById('empty-state').style.display = 'block';
+                        
+                        const currentUrl = new URL(window.location);
+                        currentUrl.searchParams.delete('chatId');
+                        currentUrl.searchParams.delete('fallbackName');
+                        currentUrl.searchParams.delete('fallbackAvatar');
+                        window.history.replaceState({}, '', currentUrl);
                         
                         // Refresh sidebar
                         loadChats();

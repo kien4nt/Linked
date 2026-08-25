@@ -188,14 +188,22 @@ public class EmbeddingService : IEmbeddingService
 
     public async Task<bool> PrepareMaterialEmbeddingsAsync()
     {
-        var isInitialized = await _redisService.GetCacheAsync<bool>(CacheKeys.MaterialEmbeddingInitialized.GetKey());
+        bool isInitialized = false;
+        if (await _redisService.IsHealthyAsync())
+        {
+            isInitialized = await _redisService.GetCacheAsync<bool>(CacheKeys.MaterialEmbeddingInitialized.GetKey());
+        }
+
         if (isInitialized)
         {
             var removedMaterialIds = await _materialRepository.GetRemovedMaterialIdsAsync();
             foreach (var id in removedMaterialIds)
             {
                 string cacheKey = CacheKeys.MaterialEmbedding.GetKey(id);
-                await _redisService.RemoveCacheAsync(cacheKey);
+                if (await _redisService.IsHealthyAsync())
+                {
+                    await _redisService.RemoveCacheAsync(cacheKey);
+                }
             }
             return false;
         }
@@ -204,14 +212,20 @@ public class EmbeddingService : IEmbeddingService
         foreach (var e in allEmbeddings)
         {
             string cacheKey = CacheKeys.MaterialEmbedding.GetKey(e.MaterialId.GetValueOrDefault());
-            var cached = await _redisService.GetCacheAsync<MaterialEmbeddingResponse>(cacheKey);
-            if (cached == null)
+            if (await _redisService.IsHealthyAsync())
             {
-                await _redisService.SetCacheAsync(cacheKey, e, CacheTtl.Medium.GetTtl());
+                var cached = await _redisService.GetCacheAsync<MaterialEmbeddingResponse>(cacheKey);
+                if (cached == null)
+                {
+                    await _redisService.SetCacheAsync(cacheKey, e, CacheTtl.Medium.GetTtl());
+                }
             }
         }
 
-        await _redisService.SetCacheAsync(CacheKeys.MaterialEmbeddingInitialized.GetKey(), true, CacheTtl.Medium.GetTtl());
+        if (await _redisService.IsHealthyAsync())
+        {
+            await _redisService.SetCacheAsync(CacheKeys.MaterialEmbeddingInitialized.GetKey(), true, CacheTtl.Medium.GetTtl());
+        }
         return true;
     }
 
@@ -242,6 +256,7 @@ public class EmbeddingService : IEmbeddingService
         try
         {
             if (!shouldSave) return;
+            if (!await _redisService.IsHealthyAsync()) return;
 
             var cachedResponse = await _redisService.GetCacheAsync<MaterialEmbeddingResponse>(cacheKey);
             if (cachedResponse == null || cachedResponse.Embedding == null || !cachedResponse.Embedding.Any())
@@ -256,7 +271,10 @@ public class EmbeddingService : IEmbeddingService
         }
         finally
         {
-            await _redisService.RemoveCacheAsync(cacheKey);
+            if (await _redisService.IsHealthyAsync())
+            {
+                await _redisService.RemoveCacheAsync(cacheKey);
+            }
         }
     }
 

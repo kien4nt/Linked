@@ -247,7 +247,11 @@ public class ChatService : IChatService
 
     public async Task<int> AcceptSupportRequestAsync(int acceptorId, string ticketId)
     {
-        var tickets = await _redisService.GetCacheAsync<List<SupportTicketDto>>("ActiveSupportTickets") ?? new List<SupportTicketDto>();
+        var tickets = new List<SupportTicketDto>();
+        if (await _redisService.IsHealthyAsync())
+        {
+            tickets = await _redisService.GetCacheAsync<List<SupportTicketDto>>("ActiveSupportTickets") ?? new List<SupportTicketDto>();
+        }
         
         var ticket = await ValidateAndExtractSupportTicketAsync(tickets, ticketId, acceptorId);
         
@@ -261,7 +265,11 @@ public class ChatService : IChatService
 
     public async Task<List<SupportTicketDto>> GetPendingRequestsAsync(int accountId, string currentRole)
     {
-        var tickets = await _redisService.GetCacheAsync<List<SupportTicketDto>>("ActiveSupportTickets") ?? new List<SupportTicketDto>();
+        var tickets = new List<SupportTicketDto>();
+        if (await _redisService.IsHealthyAsync())
+        {
+            tickets = await _redisService.GetCacheAsync<List<SupportTicketDto>>("ActiveSupportTickets") ?? new List<SupportTicketDto>();
+        }
         
         tickets = await CleanupExpiredTicketsAsync(tickets);
 
@@ -499,9 +507,13 @@ public class ChatService : IChatService
 
     private async Task AddTicketToCacheAsync(SupportTicketDto ticket)
     {
-        var tickets = await _redisService.GetCacheAsync<List<SupportTicketDto>>("ActiveSupportTickets") ?? new List<SupportTicketDto>();
-        tickets.Add(ticket);
-        await _redisService.SetCacheAsync("ActiveSupportTickets", tickets, TimeSpan.FromDays(7));
+        var tickets = new List<SupportTicketDto>();
+        if (await _redisService.IsHealthyAsync())
+        {
+            tickets = await _redisService.GetCacheAsync<List<SupportTicketDto>>("ActiveSupportTickets") ?? new List<SupportTicketDto>();
+            tickets.Add(ticket);
+            await _redisService.SetCacheAsync("ActiveSupportTickets", tickets, TimeSpan.FromDays(7));
+        }
     }
 
     private async Task<SupportTicketDto> ValidateAndExtractSupportTicketAsync(List<SupportTicketDto> tickets, string ticketId, int acceptorId)
@@ -521,8 +533,11 @@ public class ChatService : IChatService
 
     private async Task RemoveSupportTicketFromCacheAsync(List<SupportTicketDto> tickets, string ticketId)
     {
-        tickets.RemoveAll(t => t.TicketId == ticketId);
-        await _redisService.SetCacheAsync("ActiveSupportTickets", tickets, TimeSpan.FromDays(7));
+        if (await _redisService.IsHealthyAsync())
+        {
+            tickets.RemoveAll(t => t.TicketId == ticketId);
+            await _redisService.SetCacheAsync("ActiveSupportTickets", tickets, TimeSpan.FromDays(7));
+        }
     }
 
     private async Task<int> InitiateSupportChatAsync(int senderId, int acceptorId)

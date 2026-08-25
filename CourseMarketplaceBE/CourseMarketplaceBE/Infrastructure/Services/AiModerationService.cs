@@ -25,6 +25,7 @@ namespace CourseMarketplaceBE.Infrastructure.Services
         private readonly ILogger<AiModerationService> _logger;
         private readonly IAsyncPolicy<HttpResponseMessage> _retryPolicy;
         private readonly IAsyncPolicy<HttpResponseMessage> _circuitBreakerPolicy;
+        private readonly IRedisService _redisService;
 
         private const int MaxRetries = 3;
         private const string BaseUrl = UrlConst.AIModerationBaseURL;
@@ -32,9 +33,11 @@ namespace CourseMarketplaceBE.Infrastructure.Services
         public AiModerationService(
             HttpClient httpClient,
             ILogger<AiModerationService> logger,
-            Microsoft.Extensions.Configuration.IConfiguration configuration)
+            Microsoft.Extensions.Configuration.IConfiguration configuration,
+            IRedisService redisService)
         {
             _httpClient = httpClient;
+            _redisService = redisService;
             var requestTimeoutEnv = configuration["REQUEST_TIMEOUT"];
             var timeoutSeconds = 1800; // 30 minutes default
             if (!string.IsNullOrEmpty(requestTimeoutEnv) && int.TryParse(requestTimeoutEnv, out var parsedTimeout))
@@ -101,6 +104,10 @@ namespace CourseMarketplaceBE.Infrastructure.Services
         {
             try
             {
+                if (!await _redisService.IsHealthyAsync())
+                {
+                    return false;
+                }
                 var response = await _httpClient.GetAsync($"{BaseUrl}/{UrlConst.HealthCheckURL}");
                 return response.IsSuccessStatusCode;
             }

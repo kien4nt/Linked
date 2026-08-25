@@ -119,7 +119,11 @@ namespace CourseMarketplaceBE.Application.Services
         {
             string cacheKey = CacheKeys.CourseModerationDetail.GetKey(courseId);
             _logger.LogInformation("GetCourseForModerationAsync: {CacheKey}", cacheKey);
-            var response = await _redisService.GetCacheAsync<CourseModerationDetailResponse>(cacheKey);
+            CourseModerationDetailResponse? response = null;
+            if (await _redisService.IsHealthyAsync())
+            {
+                response = await _redisService.GetCacheAsync<CourseModerationDetailResponse>(cacheKey);
+            }
 
             if (response == null)
             {
@@ -130,8 +134,11 @@ namespace CourseMarketplaceBE.Application.Services
 
                 ExtractPlainTextForModerationResponse(response);
 
-                await _redisService.SetCacheAsync(cacheKey, response, CacheTtl.Short.GetTtl());
-                _logger.LogInformation("Cached moderation course {CourseId} with key {CacheKey}", courseId, cacheKey);
+                if (await _redisService.IsHealthyAsync())
+                {
+                    await _redisService.SetCacheAsync(cacheKey, response, CacheTtl.Short.GetTtl());
+                    _logger.LogInformation("Cached moderation course {CourseId} with key {CacheKey}", courseId, cacheKey);
+                }
             }
 
             return response;

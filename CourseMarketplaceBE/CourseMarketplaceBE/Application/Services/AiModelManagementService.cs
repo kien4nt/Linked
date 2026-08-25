@@ -126,10 +126,13 @@ public class AiModelManagementService : IAiModelManagementService
     public async Task<List<AiModelDto>> GetModelsByTypeAsync(string modelType)
     {
         string cacheKey = CacheKeys.AiModelType.GetKey(modelType);
-        var cached = await _redisService.GetCacheAsync<List<AiModelDto>>(cacheKey);
-        if (cached != null)
+        if (await _redisService.IsHealthyAsync())
         {
-            return cached;
+            var cached = await _redisService.GetCacheAsync<List<AiModelDto>>(cacheKey);
+            if (cached != null)
+            {
+                return cached;
+            }
         }
 
         var dbModels = await _aiModelRepo.GetModelsByTypeAsync(modelType);
@@ -146,7 +149,11 @@ public class AiModelManagementService : IAiModelManagementService
             ProcessType = m.ProcessType
         }).ToList();
 
-        await _redisService.SetCacheAsync(cacheKey, result, CacheTtl.Medium.GetTtl());
+        if (await _redisService.IsHealthyAsync())
+        {
+            await _redisService.SetCacheAsync(cacheKey, result, CacheTtl.Medium.GetTtl());
+        }
+
         return result;
     }
 
